@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SocioQuiz — Test Your Knowledge</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0d;
+    --cream: #f5f0e8;
+    --amber: #d4850a;
+    --amber-light: #f0a830;
+    --rust: #b84c20;
+    --sage: #3d5a47;
+    --mist: #e8e2d6;
+    --white: #fdfaf4;
+    --shadow: rgba(15,14,13,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Decorative background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    right: -20%;
+    width: 70vw;
+    height: 70vw;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(212,133,10,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -30%;
+    left: -15%;
+    width: 50vw;
+    height: 50vw;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(61,90,71,0.07) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  .site-header {
+    text-align: center;
+    padding: 3rem 0 2rem;
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 3rem;
+  }
+
+  .eyebrow {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 0.75rem;
+  }
+
+  .site-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 7vw, 4.5rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  .site-title span {
+    color: var(--amber);
+    font-style: italic;
+  }
+
+  .site-subtitle {
+    margin-top: 1rem;
+    font-size: 1rem;
+    color: #5a5248;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+  }
+
+  /* SCREEN SYSTEM */
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn 0.4s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* WELCOME SCREEN */
+  .welcome-card {
+    background: var(--white);
+    border: 2px solid var(--ink);
+    border-radius: 4px;
+    padding: 3rem;
+    box-shadow: 8px 8px 0 var(--ink);
+    text-align: center;
+  }
+
+  .welcome-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .welcome-card p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #4a4540;
+    max-width: 500px;
+    margin: 0 auto 2rem;
+  }
+
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+  }
+
+  .stat-box {
+    text-align: center;
+    padding: 1rem 1.5rem;
+    border: 1.5px solid var(--mist);
+    border-radius: 4px;
+    background: var(--cream);
+    min-width: 100px;
+  }
+
+  .stat-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--amber);
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #7a7268;
+    font-weight: 600;
+  }
+
+  .category-select {
+    margin: 2rem 0;
+  }
+
+  .category-select h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+
+  .category-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    justify-content: center;
+  }
+
+  .cat-chip {
+    padding: 0.4rem 1rem;
+    border: 1.5px solid var(--ink);
+    border-radius: 2px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.2s;
+    letter-spacing: 0.04em;
+  }
+
+  .cat-chip:hover, .cat-chip.selected {
+    background: var(--ink);
+    color: var(--cream);
+  }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-block;
+    padding: 0.9rem 2.5rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 2px solid var(--ink);
+    border-radius: 3px;
+    transition: all 0.18s ease;
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--cream);
+    box-shadow: 4px 4px 0 var(--amber);
+  }
+
+  .btn-primary:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--amber);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--ink);
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+
+  .btn-secondary:hover {
+    background: var(--ink);
+    color: var(--cream);
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--amber);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--sage);
+    border-color: var(--sage);
+    box-shadow: 3px 3px 0 var(--sage);
+  }
+
+  .btn-outline:hover {
+    background: var(--sage);
+    color: var(--white);
+  }
+
+  /* QUIZ SCREEN */
+  .quiz-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .progress-wrap {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .progress-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #7a7268;
+    margin-bottom: 0.4rem;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .progress-bar {
+    height: 6px;
+    background: var(--mist);
+    border-radius: 3px;
+    overflow: hidden;
+    border: 1px solid rgba(15,14,13,0.1);
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--amber), var(--rust));
+    border-radius: 3px;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+
+  .score-display {
+    background: var(--ink);
+    color: var(--amber-light);
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 0.5rem 1.2rem;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .category-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--amber);
+    background: rgba(212,133,10,0.1);
+    padding: 0.3rem 0.8rem;
+    border-radius: 2px;
+    border: 1px solid rgba(212,133,10,0.3);
+  }
+
+  .question-card {
+    background: var(--white);
+    border: 2px solid var(--ink);
+    border-radius: 4px;
+    padding: 2.5rem;
+    box-shadow: 6px 6px 0 var(--ink);
+    margin-bottom: 1.5rem;
+  }
+
+  .question-number {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #9a9288;
+    margin-bottom: 0.8rem;
+  }
+
+  .question-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+    font-weight: 700;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+
+  .options-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .option-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
+    border: 2px solid var(--mist);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    background: var(--white);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .option-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--ink);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.2s ease;
+    z-index: 0;
+  }
+
+  .option-item:hover:not(.disabled)::before { transform: scaleX(1); }
+  .option-item:hover:not(.disabled) { border-color: var(--ink); color: var(--cream); }
+  .option-item:hover:not(.disabled) .option-label,
+  .option-item:hover:not(.disabled) .option-text { color: var(--cream); }
+
+  .option-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 900;
+    color: var(--amber);
+    min-width: 1.5rem;
+    position: relative;
+    z-index: 1;
+    transition: color 0.18s;
+  }
+
+  .option-text {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    position: relative;
+    z-index: 1;
+    transition: color 0.18s;
+  }
+
+  /* Answer states */
+  .option-item.correct {
+    border-color: var(--sage);
+    background: rgba(61,90,71,0.08);
+  }
+  .option-item.correct::before { display: none; }
+  .option-item.correct .option-label { color: var(--sage); }
+
+  .option-item.wrong {
+    border-color: var(--rust);
+    background: rgba(184,76,32,0.08);
+  }
+  .option-item.wrong::before { display: none; }
+  .option-item.wrong .option-label { color: var(--rust); }
+
+  .option-item.disabled { cursor: default; pointer-events: none; }
+
+  .feedback-box {
+    padding: 1rem 1.4rem;
+    border-radius: 4px;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    margin-top: 1rem;
+    border: 1.5px solid;
+    animation: slideDown 0.3s ease;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .feedback-box.correct-fb {
+    background: rgba(61,90,71,0.08);
+    border-color: var(--sage);
+    color: var(--sage);
+  }
+
+  .feedback-box.wrong-fb {
+    background: rgba(184,76,32,0.08);
+    border-color: var(--rust);
+    color: var(--rust);
+  }
+
+  .feedback-icon { font-size: 1.1rem; margin-right: 0.4rem; }
+
+  .quiz-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  /* RESULTS SCREEN */
+  .results-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .results-grade {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(4rem, 15vw, 8rem);
+    font-weight: 900;
+    line-height: 1;
+    color: var(--amber);
+    text-shadow: 4px 4px 0 rgba(212,133,10,0.2);
+  }
+
+  .results-percent {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-top: 0.5rem;
+  }
+
+  .results-message {
+    font-size: 1rem;
+    color: #5a5248;
+    margin-top: 0.5rem;
+  }
+
+  .results-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+
+  .result-stat {
+    background: var(--white);
+    border: 2px solid var(--ink);
+    border-radius: 4px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .result-stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    display: block;
+  }
+
+  .result-stat-num.green { color: var(--sage); }
+  .result-stat-num.red { color: var(--rust); }
+  .result-stat-num.amber { color: var(--amber); }
+
+  .result-stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #7a7268;
+    font-weight: 600;
+    margin-top: 0.3rem;
+  }
+
+  /* REVIEW */
+  .review-section { margin-top: 2rem; }
+
+  .review-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    cursor: pointer;
+    padding: 1rem 1.5rem;
+    border: 2px solid var(--ink);
+    border-radius: 4px;
+    background: var(--white);
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: all 0.18s;
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+
+  .review-toggle:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+
+  .review-list { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+
+  .review-item {
+    border: 1.5px solid var(--mist);
+    border-radius: 4px;
+    padding: 1.2rem 1.4rem;
+    background: var(--white);
+    border-left: 4px solid var(--mist);
+  }
+
+  .review-item.review-correct { border-left-color: var(--sage); }
+  .review-item.review-wrong { border-left-color: var(--rust); }
+
+  .review-q {
+    font-weight: 600;
+    font-size: 0.92rem;
+    margin-bottom: 0.6rem;
+    line-height: 1.5;
+  }
+
+  .review-answer {
+    font-size: 0.85rem;
+    color: #5a5248;
+    line-height: 1.6;
+  }
+
+  .review-answer .correct-ans { color: var(--sage); font-weight: 600; }
+  .review-answer .wrong-ans { color: var(--rust); }
+
+  .results-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2.5rem;
+  }
+
+  /* TIMER */
+  .timer-display {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--cream);
+    border: 2px solid var(--ink);
+    border-radius: 3px;
+    padding: 0.4rem 1rem;
+    letter-spacing: 0.05em;
+  }
+
+  .timer-display.warning { color: var(--rust); border-color: var(--rust); animation: pulse 0.8s infinite; }
+
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+  /* Decorative divider */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 2rem 0;
+    color: #c8c0b0;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--mist);
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .question-card { padding: 1.5rem; }
+    .welcome-card { padding: 2rem 1.2rem; }
+    .stats-row { gap: 1rem; }
+    .quiz-topbar { flex-direction: column; align-items: flex-start; }
+  }
+
+  /* Confetti placeholder effect */
+  .celebration {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    pointer-events: none;
+    z-index: 100;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    top: -10px;
+    animation: confettiFall linear forwards;
+  }
+
+  @keyframes confettiFall {
+    to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="celebration" id="celebration"></div>
+
+<div class="wrapper">
+  <header class="site-header">
+    <div class="eyebrow">Academic Assessment Tool</div>
+    <h1 class="site-title">Sociology<span>Quiz</span></h1>
+    <p class="site-subtitle">A comprehensive test of sociological knowledge</p>
+    <P class="site-subtitle"> Created by <i>off</i></p>
+  </header>
+
+  <!-- WELCOME SCREEN -->
+  <div class="screen active" id="screen-welcome">
+    <div class="welcome-card">
+      <h2>Ready to test your knowledge?</h2>
+      <p>This quiz covers key topics in Sociology and Anthropology — from founding thinkers to social deviance, culture, gender, inequality, and more. Choose a category or take the full quiz.</p>
+
+      <div class="stats-row">
+        <div class="stat-box">
+          <span class="stat-number">180</span>
+          <span class="stat-label">Questions</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-number">9</span>
+          <span class="stat-label">Topics</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-number">4</span>
+          <span class="stat-label">Choices</span>
+        </div>
+      </div>
+
+      <div class="category-select">
+        <h3>Select a Category</h3>
+        <div class="category-grid" id="category-grid"></div>
+      </div>
+
+      <div class="divider">or</div>
+
+      <div>
+        <label style="font-size:0.85rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:0.6rem;">Questions per session</label>
+        <select id="q-count" style="padding:0.5rem 1rem;border:2px solid var(--ink);border-radius:3px;font-family:inherit;font-size:0.9rem;background:var(--cream);margin-bottom:1.5rem;">
+          <option value="10">10 Questions</option>
+          <option value="20" selected>20 Questions</option>
+          <option value="40">40 Questions</option>
+          <option value="all">All Questions</option>
+        </select>
+      </div>
+
+      <button class="btn btn-primary" onclick="startQuiz()">Begin Quiz →</button>
+    </div>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div class="screen" id="screen-quiz">
+    <div class="quiz-topbar">
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>Progress</span>
+          <span id="q-counter">1 / 20</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+      <div id="timer-display" class="timer-display">⏱ 00:00</div>
+      <div class="score-display" id="live-score">Score: 0</div>
+    </div>
+
+    <div id="category-badge-wrap"></div>
+
+    <div class="question-card" id="question-card">
+      <div class="question-number" id="q-number-label">Question 1</div>
+      <div class="question-text" id="question-text">Loading...</div>
+    </div>
+
+    <ul class="options-list" id="options-list"></ul>
+    <div id="feedback-area"></div>
+
+    <div class="quiz-actions">
+      <button class="btn btn-secondary" id="next-btn" onclick="nextQuestion()" style="display:none">Next Question →</button>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div class="screen" id="screen-results">
+    <div class="results-header">
+      <div class="results-grade" id="results-grade">A+</div>
+      <div class="results-percent" id="results-percent">100%</div>
+      <div class="results-message" id="results-message">Outstanding!</div>
+    </div>
+
+    <div class="results-stats">
+      <div class="result-stat">
+        <span class="result-stat-num green" id="res-correct">0</span>
+        <div class="result-stat-label">Correct</div>
+      </div>
+      <div class="result-stat">
+        <span class="result-stat-num red" id="res-wrong">0</span>
+        <div class="result-stat-label">Incorrect</div>
+      </div>
+      <div class="result-stat">
+        <span class="result-stat-num amber" id="res-total">0</span>
+        <div class="result-stat-label">Total</div>
+      </div>
+      <div class="result-stat">
+        <span class="result-stat-num amber" id="res-time">0:00</span>
+        <div class="result-stat-label">Time Taken</div>
+      </div>
+    </div>
+
+    <div class="review-section">
+      <button class="review-toggle" onclick="toggleReview(this)">
+        📋 View Answer Review
+      </button>
+      <div class="review-list" id="review-list" style="display:none"></div>
+    </div>
+
+    <div class="results-actions">
+      <button class="btn btn-primary" onclick="restartQuiz()">Retake Quiz ↺</button>
+      <button class="btn btn-outline" onclick="showWelcome()">← Change Category</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const ALL_QUESTIONS = [
+  // ─── 1. UNDERSTANDING SOCIOLOGY ───────────────────────────────────────────
+  { cat: "Understanding Sociology", q: "Who is widely regarded as the father of sociology?", opts: ["Karl Marx","Émile Durkheim","Auguste Comte","Max Weber"], ans: 2, exp: "Auguste Comte coined the term 'sociology' and proposed studying society scientifically." },
+  { cat: "Understanding Sociology", q: "The term 'sociology' was coined by which philosopher?", opts: ["Émile Durkheim","Auguste Comte","Herbert Spencer","Max Weber"], ans: 1, exp: "Auguste Comte, a French philosopher, first introduced the term sociology." },
+  { cat: "Understanding Sociology", q: "In which century did sociology emerge as a discipline?", opts: ["17th century","18th century","19th century","20th century"], ans: 2, exp: "Sociology emerged in the 19th century as a response to industrialization and social change." },
+  { cat: "Understanding Sociology", q: "Which concept did Auguste Comte emphasize regarding how social phenomena should be studied?", opts: ["Conflict theory","Positivism","Functionalism","Interactionism"], ans: 1, exp: "Comte proposed positivism — studying society using scientific methods like observation and comparison." },
+  { cat: "Understanding Sociology", q: "Émile Durkheim introduced the concept of:", opts: ["Class conflict","Social facts","Social action","Cultural lag"], ans: 1, exp: "Durkheim introduced 'social facts' — social forces that influence individual behavior." },
+  { cat: "Understanding Sociology", q: "Karl Marx's sociological focus was primarily on:", opts: ["Bureaucracy and authority","Suicide and social integration","Class conflict and economic inequality","Social facts and norms"], ans: 2, exp: "Marx focused on class conflict and economic inequality as drivers of social change." },
+  { cat: "Understanding Sociology", q: "Max Weber emphasized the importance of understanding:", opts: ["Social facts","Class struggle","Social action and meaning","Population growth"], ans: 2, exp: "Weber stressed understanding social action — how individuals interpret their behavior." },
+  { cat: "Understanding Sociology", q: "Which sociologist studied suicide to show it had social causes?", opts: ["Karl Marx","Max Weber","Auguste Comte","Émile Durkheim"], ans: 3, exp: "Durkheim's study of suicide demonstrated that even personal acts have social causes." },
+  { cat: "Understanding Sociology", q: "Micro-level sociology examines:", opts: ["Political systems and global economies","Family relationships and personal interactions","National institutions","Industrial production"], ans: 1, exp: "Micro-level sociology focuses on small-scale interactions like family relationships." },
+  { cat: "Understanding Sociology", q: "Macro-level sociology focuses on:", opts: ["Personal conversations","Individual psychology","Political and economic institutions","Personal identity"], ans: 2, exp: "Macro-level sociology examines large-scale structures like political and economic institutions." },
+  { cat: "Understanding Sociology", q: "Which of the following is NOT listed as a reason to study sociology?", opts: ["Understanding social behavior","Developing critical thinking","Engineering chemical compounds","Analyzing social problems"], ans: 2, exp: "Engineering chemical compounds is unrelated to sociology's purposes." },
+  { cat: "Understanding Sociology", q: "Sociology is best described as:", opts: ["The study of individual psychology","The scientific study of human society and social relationships","The biological study of human evolution","The study of ancient civilizations"], ans: 1, exp: "Sociology is the systematic study of human society, social relationships, and institutions." },
+  { cat: "Understanding Sociology", q: "Social stratification refers to:", opts: ["The movement of people between countries","The ranking of groups in society by wealth, power, or status","The study of language","Methods of cultural transmission"], ans: 1, exp: "Social stratification is the hierarchical ranking of society's members." },
+  { cat: "Understanding Sociology", q: "Which sociologist also studied bureaucracy and religion extensively?", opts: ["Karl Marx","Auguste Comte","Max Weber","Émile Durkheim"], ans: 2, exp: "Max Weber conducted influential studies on bureaucracy, authority, and religion." },
+  { cat: "Understanding Sociology", q: "A sociology graduate could pursue a career in:", opts: ["Aerospace engineering","Medical surgery","Social policy analysis","Quantum physics"], ans: 2, exp: "Sociology graduates can work in social research, public administration, and policy analysis." },
+  { cat: "Understanding Sociology", q: "The study of how social structures influence people's lives is central to:", opts: ["Chemistry","Sociology","Zoology","Astronomy"], ans: 1, exp: "Sociology studies how social structures shape people's lives and behaviors." },
+  { cat: "Understanding Sociology", q: "According to Marx, social change often occurs through:", opts: ["Diplomatic negotiations","Scientific discoveries","Struggles between social classes","Religious reformation"], ans: 2, exp: "Marx argued that class struggle between owners and workers drives social change." },
+  { cat: "Understanding Sociology", q: "Positivism in sociology means:", opts: ["Optimistic thinking about society","Using scientific methods to study social phenomena","Focusing only on positive aspects of society","Ignoring social problems"], ans: 1, exp: "Positivism refers to applying scientific observation and experimentation to study society." },
+  { cat: "Understanding Sociology", q: "Which sociologist believed sociology should be used to improve society?", opts: ["Max Weber","Karl Marx","Émile Durkheim","Auguste Comte"], ans: 3, exp: "Auguste Comte believed sociology should serve as a tool to improve society." },
+  { cat: "Understanding Sociology", q: "Social institutions studied by sociology include:", opts: ["Only government","Family, education, religion, and economy","Only financial markets","Only individual behaviors"], ans: 1, exp: "Sociology examines institutions like family, education, religion, and economic systems." },
+
+  // ─── 2. ANTHROPOLOGY ──────────────────────────────────────────────────────
+  { cat: "Anthropology", q: "Anthropology is best defined as:", opts: ["Study of human politics","Scientific study of human beings, their biology, culture, and social organization","Study of ancient languages only","Study of non-human primates"], ans: 1, exp: "Anthropology is the broad scientific study of human beings encompassing biology, culture, and society." },
+  { cat: "Anthropology", q: "Which branch of anthropology studies human cultures and traditions?", opts: ["Physical anthropology","Linguistic anthropology","Cultural anthropology","Archaeology"], ans: 2, exp: "Cultural anthropology examines human cultures, beliefs, customs, and traditions." },
+  { cat: "Anthropology", q: "Physical (biological) anthropology primarily studies:", opts: ["Language and culture","Human evolution and biological variation","Ancient ruins and artifacts","Social norms"], ans: 1, exp: "Physical anthropology focuses on human evolution and biological differences among populations." },
+  { cat: "Anthropology", q: "Archaeology studies ancient human societies through:", opts: ["Social surveys","Artifacts, fossils, tools, and ruins","Genetic analysis only","Modern ethnographies"], ans: 1, exp: "Archaeologists examine physical remains like artifacts and ruins to understand ancient societies." },
+  { cat: "Anthropology", q: "Linguistic anthropology focuses on:", opts: ["Language and its role in social life","Economic systems","Physical human evolution","Ancient religious texts"], ans: 0, exp: "Linguistic anthropology studies how language shapes social life and cultural identity." },
+  { cat: "Anthropology", q: "How many major branches does anthropology generally have?", opts: ["Two","Three","Four","Five"], ans: 2, exp: "Anthropology is divided into four branches: cultural, physical, archaeology, and linguistic." },
+  { cat: "Anthropology", q: "What distinguishes anthropology from sociology?", opts: ["Anthropology only studies Western societies","Anthropology studies both contemporary and traditional societies","Sociology studies biology","Anthropology ignores culture"], ans: 1, exp: "Anthropology often studies both modern and traditional societies, unlike sociology's primary modern focus." },
+  { cat: "Anthropology", q: "What does anthropology seek to understand above all?", opts: ["Economic trends","What makes humans unique and how societies develop","Military history","Technological progress"], ans: 1, exp: "Anthropology aims to understand human uniqueness and the development of human societies." },
+  { cat: "Anthropology", q: "Which branch of anthropology would study cave paintings?", opts: ["Linguistic anthropology","Cultural anthropology","Archaeology","Physical anthropology"], ans: 2, exp: "Archaeology studies ancient human societies through physical remains including cave paintings." },
+  { cat: "Anthropology", q: "Biological anthropology is another name for:", opts: ["Cultural anthropology","Archaeology","Linguistic anthropology","Physical anthropology"], ans: 3, exp: "Physical anthropology is also called biological anthropology." },
+  { cat: "Anthropology", q: "An anthropologist studying a remote tribe's rituals is practicing:", opts: ["Archaeology","Cultural anthropology","Linguistic anthropology","Physical anthropology"], ans: 1, exp: "Studying rituals and customs of a group is the work of cultural anthropology." },
+  { cat: "Anthropology", q: "The concept of 'ethnography' is most closely associated with:", opts: ["Archaeology","Physical anthropology","Cultural anthropology","Demography"], ans: 2, exp: "Ethnography — in-depth study of a culture — is a primary method of cultural anthropology." },
+  { cat: "Anthropology", q: "Fossils are primarily used in which anthropological branch?", opts: ["Linguistic anthropology","Cultural anthropology","Archaeology","Physical anthropology"], ans: 3, exp: "Physical anthropology uses fossils to study human biological evolution." },
+
+  // ─── 3. CULTURE ───────────────────────────────────────────────────────────
+  { cat: "Culture", q: "Culture is defined as:", opts: ["Biological traits passed from parents to children","Shared patterns of beliefs, values, customs, behaviors, and symbols of a group","Individual preferences and hobbies","Government policies and laws"], ans: 1, exp: "Culture is the shared system of beliefs, values, customs, and symbols characterizing a group." },
+  { cat: "Culture", q: "Which of the following is NOT an element of culture?", opts: ["Values","Norms","Genetics","Language"], ans: 2, exp: "Genetics is biological, not cultural. Culture's elements include values, norms, beliefs, symbols, and language." },
+  { cat: "Culture", q: "Norms in culture refer to:", opts: ["Standards of what is good or desirable","Rules that guide acceptable behavior","Objects with special meaning","Scientific facts"], ans: 1, exp: "Norms are rules that guide acceptable behavior within society." },
+  { cat: "Culture", q: "Values in culture are:", opts: ["Standards for what is good, desirable, or important","Official government rules","Language dialects","Physical monuments"], ans: 0, exp: "Values are the standards used by society to judge what is good, desirable, or important." },
+  { cat: "Culture", q: "Language in culture is important primarily because it:", opts: ["Determines physical strength","Allows sharing of ideas and transmission of culture across generations","Controls economic production","Defines biological identity"], ans: 1, exp: "Language enables cultural transmission across generations and sharing of ideas." },
+  { cat: "Culture", q: "Which characteristic of culture means it can change over time?", opts: ["Culture is static","Culture is dynamic","Culture is biological","Culture is individual"], ans: 1, exp: "Culture is dynamic — it changes over time in response to social and historical factors." },
+  { cat: "Culture", q: "Culture is 'integrated' means:", opts: ["It can only exist in one country","Its various parts are interconnected","People integrate culture into their DNA","It is a government program"], ans: 1, exp: "Cultural integration means the parts of culture are interconnected and influence one another." },
+  { cat: "Culture", q: "The process through which culture is learned is called:", opts: ["Mutation","Socialization","Legislation","Fossilization"], ans: 1, exp: "Culture is learned through socialization — the process of absorbing cultural norms and values." },
+  { cat: "Culture", q: "Symbols in culture are:", opts: ["Only written words","Objects, gestures, or signs carrying particular cultural meanings","Biological traits","Tax records"], ans: 1, exp: "Symbols are objects, gestures, or signs that carry specific meanings within a culture." },
+  { cat: "Culture", q: "Which statement about culture is TRUE?", opts: ["Culture is inherited biologically","Culture is only shared by small tribes","Culture is learned, not inherited biologically","Culture never changes"], ans: 2, exp: "Culture is not biologically inherited — it is learned through socialization and interaction." },
+  { cat: "Culture", q: "Cultural ethnocentrism refers to:", opts: ["Accepting all cultures as equal","Judging other cultures by one's own cultural standards","Adopting a foreign culture completely","Studying cultures scientifically"], ans: 1, exp: "Ethnocentrism is the tendency to judge other cultures by the standards of one's own culture." },
+  { cat: "Culture", q: "Cultural relativism means:", opts: ["One culture is superior to all others","Understanding a culture on its own terms","All cultures must follow Western standards","Culture never affects behavior"], ans: 1, exp: "Cultural relativism involves understanding a culture from within its own context and values." },
+  { cat: "Culture", q: "Which of these is an example of a cultural symbol?", opts: ["A heartbeat","A national flag","A blood type","A chromosome"], ans: 1, exp: "A national flag is a symbol carrying specific cultural and political meanings." },
+  { cat: "Culture", q: "Beliefs in culture are:", opts: ["Enforced government rules","Ideas people accept as true about the world","Genetic traits","Only religious doctrines"], ans: 1, exp: "Beliefs are ideas that members of a culture accept as true about the world." },
+  { cat: "Culture", q: "The term 'subculture' refers to:", opts: ["A group that rejects all cultural norms","A smaller group within a larger culture with distinct values","An underground political movement","A failed civilization"], ans: 1, exp: "A subculture is a group with distinct values within a larger cultural context." },
+
+  // ─── 4. SOCIAL CONTROL & DEVIANCE ────────────────────────────────────────
+  { cat: "Social Control & Deviance", q: "Social control refers to:", opts: ["Methods used to regulate behavior and maintain social order","The control of stock markets","Individual self-discipline","Political censorship only"], ans: 0, exp: "Social control encompasses all methods society uses to regulate behavior and maintain order." },
+  { cat: "Social Control & Deviance", q: "An example of informal social control is:", opts: ["Court sentencing","Community pressure and social disapproval","Police enforcement","Prison sentences"], ans: 1, exp: "Informal social control operates through everyday interactions like community pressure." },
+  { cat: "Social Control & Deviance", q: "Formal social control is exercised through:", opts: ["Gossip and peer pressure","Official institutions like law, police, and courts","Family scolding","Cultural customs"], ans: 1, exp: "Formal social control uses official institutions such as laws, courts, and police." },
+  { cat: "Social Control & Deviance", q: "Deviance is defined as:", opts: ["Criminal behavior only","Behaviors that violate social norms and expectations","Personal lifestyle choices","Scientific anomalies"], ans: 1, exp: "Deviance refers to any behavior that violates social norms, not just criminal acts." },
+  { cat: "Social Control & Deviance", q: "Strain Theory was developed by:", opts: ["Howard Becker","Émile Durkheim","Robert K. Merton","Max Weber"], ans: 2, exp: "Robert K. Merton developed Strain Theory to explain deviance from societal goals." },
+  { cat: "Social Control & Deviance", q: "According to Strain Theory, deviance occurs when:", opts: ["Individuals are mentally ill","People cannot achieve approved goals through legitimate means","Society has too many laws","Families are too strict"], ans: 1, exp: "Merton argued people turn to deviance when legitimate pathways to social goals are blocked." },
+  { cat: "Social Control & Deviance", q: "Labeling Theory was proposed by:", opts: ["Robert Merton","Karl Marx","Howard S. Becker","Auguste Comte"], ans: 2, exp: "Howard S. Becker proposed Labeling Theory, arguing deviance results from social labeling." },
+  { cat: "Social Control & Deviance", q: "According to Labeling Theory, deviance results from:", opts: ["Economic hardship alone","Society labeling certain individuals as deviant","Biological predisposition","Lack of intelligence"], ans: 1, exp: "Labeling Theory states that being labeled deviant by society can create a deviant identity." },
+  { cat: "Social Control & Deviance", q: "Social Learning Theory suggests deviance is:", opts: ["Inherited genetically","Caused by brain abnormalities","Learned from others through interaction and observation","A random occurrence"], ans: 2, exp: "Social Learning Theory argues that deviant behavior is learned through social interaction." },
+  { cat: "Social Control & Deviance", q: "Which institution is NOT listed as a mechanism for controlling deviance?", opts: ["Family","Education","Stock exchange","Religion"], ans: 2, exp: "The stock exchange is not a mechanism for social control of deviance." },
+  { cat: "Social Control & Deviance", q: "What is true about deviance across cultures?", opts: ["Deviance is universally the same","What is considered deviant varies across cultures and time periods","Deviance only exists in Western societies","Deviance is always criminal"], ans: 1, exp: "Deviance is culturally relative — what counts as deviant differs across societies and eras." },
+  { cat: "Social Control & Deviance", q: "Which of the following is an example of formal social control?", opts: ["Peer ridicule","Religious sermons","Court-ordered community service","Social exclusion"], ans: 2, exp: "Court-ordered service is a formal control mechanism administered through the justice system." },
+  { cat: "Social Control & Deviance", q: "Without social control, societies would likely experience:", opts: ["Greater happiness","Chaos and disorder","Perfect freedom","Economic growth"], ans: 1, exp: "Social control prevents chaos and maintains social order." },
+  { cat: "Social Control & Deviance", q: "The 'self-fulfilling prophecy' in deviance research is closely linked to:", opts: ["Strain Theory","Social Learning Theory","Labeling Theory","Conflict Theory"], ans: 2, exp: "Labeling can create a self-fulfilling prophecy where labeled individuals internalize deviant identities." },
+  { cat: "Social Control & Deviance", q: "Family discipline is an example of:", opts: ["Formal social control","Deviance","Informal social control","Legal sanction"], ans: 2, exp: "Family discipline operates informally through everyday relationships, not official institutions." },
+  { cat: "Social Control & Deviance", q: "Which sociological perspective views deviance as a product of power imbalances?", opts: ["Functionalism","Symbolic interactionism","Conflict theory","Positivism"], ans: 2, exp: "Conflict theory sees deviance as defined by powerful groups to control less powerful ones." },
+
+  // ─── 5. HEALTH & SOCIETY ─────────────────────────────────────────────────
+  { cat: "Health & Society", q: "The sociology of health examines:", opts: ["Only medical procedures","How social conditions affect people's health and healthcare access","The biology of diseases","Pharmaceutical production only"], ans: 1, exp: "Sociology of health explores the social, economic, and environmental conditions that affect health." },
+  { cat: "Health & Society", q: "Social determinants of health include:", opts: ["Blood type and genetics","Income, education, housing, and environment","Only natural disasters","Personal fitness routines"], ans: 1, exp: "Social determinants include income, education, housing, employment, and environment." },
+  { cat: "Health & Society", q: "Health is described in the lecture as:", opts: ["Only a biological condition","A spiritual concept","Both a biological and social phenomenon","Entirely a personal responsibility"], ans: 2, exp: "Health is both biological and a social phenomenon shaped by social and economic factors." },
+  { cat: "Health & Society", q: "People living in poor social conditions tend to experience:", opts: ["Better health outcomes","Equal health outcomes","Poorer health outcomes","No significant difference"], ans: 2, exp: "Poverty and poor living conditions are linked to poorer health outcomes." },
+  { cat: "Health & Society", q: "Which of the following is a healthcare institution?", opts: ["Police station","Court of law","Government health agency","Stock exchange"], ans: 2, exp: "Government health agencies are healthcare institutions responsible for public health." },
+  { cat: "Health & Society", q: "Which social determinant is NOT mentioned in the lecture?", opts: ["Employment","Education","Skin color","Housing"], ans: 2, exp: "While discrimination exists, the lecture specifically lists income, education, housing, employment, and environment." },
+  { cat: "Health & Society", q: "Healthcare policies are described as:", opts: ["Irrelevant to health outcomes","Important for improving population health","Only applicable to wealthy nations","A form of social deviance"], ans: 1, exp: "Healthcare policies play an important role in improving and maintaining population health." },
+  { cat: "Health & Society", q: "The concept that socioeconomic status affects health is an example of:", opts: ["Biological determinism","Social determinants of health","Cultural relativism","Strain theory"], ans: 1, exp: "The link between socioeconomic status and health is a classic social determinant of health." },
+  { cat: "Health & Society", q: "NGOs (non-governmental organizations) are listed as part of:", opts: ["Formal social control","Healthcare institutions","Cultural systems","Economic institutions"], ans: 1, exp: "NGOs are listed among healthcare institutions responsible for maintaining public health." },
+  { cat: "Health & Society", q: "Access to healthcare services is listed as a:", opts: ["Cultural norm","Form of deviance","Social determinant of health","Political institution"], ans: 2, exp: "Access to healthcare is a critical social determinant that affects health outcomes." },
+
+  // ─── 6. SOCIAL INEQUALITY ─────────────────────────────────────────────────
+  { cat: "Social Inequality", q: "Social inequality refers to:", opts: ["Equal distribution of resources","Unequal distribution of resources, opportunities, and privileges","Biological differences among humans","Different personal tastes"], ans: 1, exp: "Social inequality is the unequal distribution of resources, opportunities, and privileges in society." },
+  { cat: "Social Inequality", q: "Which of the following is a form of social inequality?", opts: ["Cultural diversity","Gender inequality","Religious freedom","Linguistic variation"], ans: 1, exp: "Gender inequality — unequal rights and opportunities based on gender — is a form of social inequality." },
+  { cat: "Social Inequality", q: "Economic inequality involves differences in:", opts: ["Language and culture","Income, wealth, and economic resources","Skin color only","Social customs"], ans: 1, exp: "Economic inequality refers to disparities in income, wealth, and access to economic resources." },
+  { cat: "Social Inequality", q: "Which is a consequence of social inequality?", opts: ["Increased social stability","Unlimited social mobility","Poverty and social unrest","Equal opportunity for all"], ans: 2, exp: "Social inequality leads to poverty, social unrest, crime, and limited social mobility." },
+  { cat: "Social Inequality", q: "Historical and colonial influences are listed as:", opts: ["Consequences of inequality","Causes of social inequality","Solutions to inequality","Types of social control"], ans: 1, exp: "Colonial history is listed as a major cause of persistent social inequality in many societies." },
+  { cat: "Social Inequality", q: "Political inequality refers to:", opts: ["Different voting ages","Unequal access to political power and participation","Different party ideologies","Electoral campaigning rules"], ans: 1, exp: "Political inequality means some groups have less access to political power and participation." },
+  { cat: "Social Inequality", q: "Educational inequality involves:", opts: ["Differences in learning styles","Unequal access to quality education and learning opportunities","Different school curricula","Student preference for subjects"], ans: 1, exp: "Educational inequality is about unequal access to quality education across social groups." },
+  { cat: "Social Inequality", q: "Reducing inequality is described in the lecture as:", opts: ["Economically harmful","Essential for social stability and development","Impossible to achieve","A concern only for developing nations"], ans: 1, exp: "The lecture states that reducing inequality is essential for social stability and development." },
+  { cat: "Social Inequality", q: "Social class structure is listed as:", opts: ["A solution to inequality","A consequence of deviance","A cause of social inequality","A cultural symbol"], ans: 2, exp: "Social class structure is identified as a major cause of social inequality." },
+  { cat: "Social Inequality", q: "Limited social mobility is described as a:", opts: ["Cause of inequality","Consequence of inequality","Cultural norm","Form of social control"], ans: 1, exp: "Limited social mobility — difficulty moving between social classes — is a consequence of inequality." },
+  { cat: "Social Inequality", q: "Which theorist is most associated with studying economic inequality and class?", opts: ["Émile Durkheim","Max Weber","Karl Marx","Auguste Comte"], ans: 2, exp: "Karl Marx is the foundational theorist of class conflict and economic inequality." },
+  { cat: "Social Inequality", q: "Discrimination is listed in the lecture as:", opts: ["A form of deviance","A cause of social inequality","A type of social control","A cultural value"], ans: 1, exp: "Discrimination is identified as a major cause of social inequality." },
+
+  // ─── 7. GENDER & SOCIETY ─────────────────────────────────────────────────
+  { cat: "Gender & Society", q: "Gender in sociology refers to:", opts: ["Biological sex differences","Social and cultural roles associated with being male or female","Genetic chromosomal patterns","Physical appearance only"], ans: 1, exp: "Gender refers to socially constructed roles and expectations, unlike biological sex." },
+  { cat: "Gender & Society", q: "Gender roles are shaped by:", opts: ["DNA and chromosomes","Nutrition and diet","Society and culture","The legal system alone"], ans: 2, exp: "Gender roles are products of socialization — shaped by society and cultural expectations." },
+  { cat: "Gender & Society", q: "Traditional gender role expectations include:", opts: ["Men as caregivers, women as providers","Men as providers, women as caregivers","Men and women having identical roles","No role expectations at all"], ans: 1, exp: "Traditionally, men were expected to provide financially while women were expected to care for families." },
+  { cat: "Gender & Society", q: "Gender inequality occurs when:", opts: ["Men and women have equal rights","One gender has more rights, opportunities, or power than another","Different cultures exist","Economic markets fluctuate"], ans: 1, exp: "Gender inequality means one gender has more power, opportunities, or rights than the other." },
+  { cat: "Gender & Society", q: "An example of gender inequality is:", opts: ["Cultural diversity","The wage gap between men and women","Universal suffrage","Equal education access"], ans: 1, exp: "The wage gap, where women earn less than men for the same work, is a form of gender inequality." },
+  { cat: "Gender & Society", q: "The lecture states that gender roles are:", opts: ["Fixed and permanent","Changing in modern societies","Irrelevant in contemporary times","Determined by religion alone"], ans: 1, exp: "The lecture notes that traditional gender roles are evolving in modern societies." },
+  { cat: "Gender & Society", q: "Promoting gender equality is described as helping to:", opts: ["Increase military power","Improve social and economic development","Reduce cultural diversity","Increase population growth"], ans: 1, exp: "Gender equality is linked to improved social and economic development in the lecture." },
+  { cat: "Gender & Society", q: "Unequal political representation is mentioned as an example of:", opts: ["Cultural diversity","Educational inequality","Gender inequality","Social control"], ans: 2, exp: "Women's underrepresentation in politics is cited as an example of gender inequality." },
+  { cat: "Gender & Society", q: "Which term describes the systematic disadvantages faced by women in society?", opts: ["Matriarchy","Patriarchy","Democracy","Theocracy"], ans: 1, exp: "Patriarchy refers to social systems where men hold primary power and women face systematic disadvantages." },
+  { cat: "Gender & Society", q: "The feminist sociological perspective primarily focuses on:", opts: ["Class struggle and economic production","Gender inequality and women's rights","Environmental sustainability","Technological advancement"], ans: 1, exp: "Feminist sociology examines gender inequality and advocates for equal rights for women." },
+  { cat: "Gender & Society", q: "Gender is different from biological sex because:", opts: ["They are identical","Gender is learned and socially constructed; sex is biological","Sex is culturally determined","Gender is genetic"], ans: 1, exp: "Biological sex is determined by chromosomes; gender is socially and culturally constructed." },
+  { cat: "Gender & Society", q: "Limited access to education for women in some regions is an example of:", opts: ["Cultural relativism","Educational gender inequality","Normal social development","Social learning theory"], ans: 1, exp: "Restricting women's education is a form of gender-based educational inequality." },
+
+  // ─── 8. POPULAR CULTURE & DIGITAL WORLD ──────────────────────────────────
+  { cat: "Popular Culture & Technology", q: "Popular culture is primarily influenced by:", opts: ["Ancient traditions and oral history","Mass media and technology","Government legislation","Scientific discoveries"], ans: 1, exp: "Popular culture is largely shaped and spread through mass media and technology." },
+  { cat: "Popular Culture & Technology", q: "Which of the following is an example of popular culture?", opts: ["Ancient cave paintings","Social media trends","Roman law","Indigenous rituals"], ans: 1, exp: "Social media trends are contemporary examples of popular culture." },
+  { cat: "Popular Culture & Technology", q: "Popular culture spreads quickly due to:", opts: ["Slow information exchange","Government mandates","Globalization","Strict cultural preservation"], ans: 2, exp: "Globalization facilitates the rapid spread of popular culture across national boundaries." },
+  { cat: "Popular Culture & Technology", q: "The digital world includes:", opts: ["Only desktop computers","Internet, smartphones, social media, and AI","Paper-based communication only","Traditional farming methods"], ans: 1, exp: "The digital world encompasses internet, smartphones, social media, AI, and related technologies." },
+  { cat: "Popular Culture & Technology", q: "A positive impact of technology is:", opts: ["Cybercrime","Privacy violations","Faster communication and access to global information","Spread of misinformation"], ans: 2, exp: "Technology enables faster communication and provides access to global information." },
+  { cat: "Popular Culture & Technology", q: "A negative impact of technology listed in the lecture is:", opts: ["Online education opportunities","Economic innovation","Privacy concerns and cybercrime","Faster communication"], ans: 2, exp: "The lecture lists cybercrime, privacy concerns, addiction, and misinformation as negative technology impacts." },
+  { cat: "Popular Culture & Technology", q: "The lecture states society must:", opts: ["Reject all technology","Accept all technology without question","Manage technological development responsibly","Let corporations control technology completely"], ans: 2, exp: "The lecture emphasizes that society must manage technological development responsibly." },
+  { cat: "Popular Culture & Technology", q: "Online education platforms are described as a:", opts: ["Negative impact of technology","Positive impact of technology","Form of social deviance","Cultural norm"], ans: 1, exp: "Online education is listed as a positive impact of technological advancement." },
+  { cat: "Popular Culture & Technology", q: "Spread of misinformation is listed as a:", opts: ["Positive impact of technology","Neutral technological development","Negative impact of technology","Cultural value"], ans: 2, exp: "The spread of misinformation through digital platforms is a negative societal impact of technology." },
+  { cat: "Popular Culture & Technology", q: "Economic innovation through technology is considered a:", opts: ["Negative impact","Neutral development","Positive impact","Cultural deviance"], ans: 2, exp: "Economic innovation enabled by technology is listed as a positive technological impact." },
+  { cat: "Popular Culture & Technology", q: "Artificial intelligence (AI) is mentioned as part of:", opts: ["Traditional culture","The digital world","Environmental sustainability","Social control mechanisms"], ans: 1, exp: "AI is listed among the technologies that constitute the modern digital world." },
+  { cat: "Popular Culture & Technology", q: "Which of the following best describes the concept of 'digital divide'?", opts: ["The equal access to technology for all","The gap between those with and without access to digital technologies","A type of cybercrime","A form of popular culture"], ans: 1, exp: "The digital divide refers to inequality in access to digital technology between different social groups." },
+
+  // ─── 9. ENVIRONMENTAL SUSTAINABILITY ─────────────────────────────────────
+  { cat: "Environmental Sustainability", q: "Environmental sustainability refers to:", opts: ["Maximizing industrial output","Responsible use of natural resources preserving the environment for future generations","Only recycling plastic","Banning all industrial activity"], ans: 1, exp: "Environmental sustainability is about using resources responsibly to preserve them for future generations." },
+  { cat: "Environmental Sustainability", q: "Which human activity is listed as placing pressure on the environment?", opts: ["Organic farming","Renewable energy use","Industrialization and deforestation","Ocean conservation"], ans: 2, exp: "Industrialization and deforestation are listed as major human pressures on the environment." },
+  { cat: "Environmental Sustainability", q: "Which is a major environmental challenge listed in the lecture?", opts: ["Political inequality","Climate change and pollution","Social deviance","Gender inequality"], ans: 1, exp: "Climate change, pollution, deforestation, and biodiversity loss are the major environmental challenges listed." },
+  { cat: "Environmental Sustainability", q: "Environmental sustainability helps to:", opts: ["Increase industrial pollution","Protect ecosystems and maintain biodiversity","Reduce government regulation","Maximize resource extraction"], ans: 1, exp: "Sustainability protects ecosystems, maintains biodiversity, and ensures resource availability." },
+  { cat: "Environmental Sustainability", q: "Which is a strategy for environmental sustainability?", opts: ["Expanding fossil fuel use","Renewable energy development and recycling","Increasing deforestation","Reducing environmental education"], ans: 1, exp: "Renewable energy development and recycling are key strategies for environmental sustainability." },
+  { cat: "Environmental Sustainability", q: "Loss of biodiversity is listed as:", opts: ["A social determinant of health","A major environmental challenge","A form of deviance","A cultural symbol"], ans: 1, exp: "Loss of biodiversity is identified as one of the major environmental challenges facing humanity." },
+  { cat: "Environmental Sustainability", q: "Government regulations are listed as a strategy for:", opts: ["Social control only","Environmental sustainability","Reducing gender inequality","Promoting popular culture"], ans: 1, exp: "Government regulations are listed as a key strategy for achieving environmental sustainability." },
+  { cat: "Environmental Sustainability", q: "Sustainable agriculture is described as:", opts: ["A form of cultural deviance","A strategy for environmental sustainability","A type of social institution","A consequence of inequality"], ans: 1, exp: "Sustainable agriculture is listed as a strategy supporting environmental sustainability." },
+  { cat: "Environmental Sustainability", q: "Environmental education is listed in the lecture as:", opts: ["A cause of pollution","A strategy for sustainability","A form of popular culture","A social determinant of health"], ans: 1, exp: "Environmental education is identified as one of the strategies for achieving sustainability." },
+  { cat: "Environmental Sustainability", q: "The concept of 'ecological footprint' measures:", opts: ["Physical size of a country","The amount of nature required to sustain human activities","Government spending on environment","Pollution levels only"], ans: 1, exp: "Ecological footprint measures the natural resources required to support human activities and lifestyles." },
+  { cat: "Environmental Sustainability", q: "Waste management is described as:", opts: ["A solved environmental problem","A social norm","A major environmental challenge","A cultural symbol"], ans: 2, exp: "Waste management is listed among the major ongoing environmental challenges." },
+  { cat: "Environmental Sustainability", q: "Which of the following best connects environmental issues to sociology?", opts: ["Pollution only affects wealthy people","Environmental problems are purely scientific, not social","Social inequalities often determine who bears the greatest environmental burdens","Technology will automatically solve all environmental issues"], ans: 2, exp: "Sociologists study environmental justice — how disadvantaged groups often face disproportionate environmental harm." },
+];
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let state = {
+  questions: [],
+  current: 0,
+  score: 0,
+  answered: [],
+  startTime: null,
+  timerInterval: null,
+  selectedCategory: 'All',
+};
+
+const CATEGORIES = ['All', ...new Set(ALL_QUESTIONS.map(q => q.cat))];
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+function init() {
+  const grid = document.getElementById('category-grid');
+  CATEGORIES.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-chip' + (cat === 'All' ? ' selected' : '');
+    btn.textContent = cat;
+    btn.onclick = () => selectCategory(cat, btn);
+    grid.appendChild(btn);
+  });
+}
+
+function selectCategory(cat, btn) {
+  document.querySelectorAll('.cat-chip').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  state.selectedCategory = cat;
+}
+
+function startQuiz() {
+  const countVal = document.getElementById('q-count').value;
+  let pool = state.selectedCategory === 'All'
+    ? [...ALL_QUESTIONS]
+    : ALL_QUESTIONS.filter(q => q.cat === state.selectedCategory);
+
+  // Shuffle
+  pool = pool.sort(() => Math.random() - 0.5);
+
+  const count = countVal === 'all' ? pool.length : Math.min(parseInt(countVal), pool.length);
+  state.questions = pool.slice(0, count);
+  state.current = 0;
+  state.score = 0;
+  state.answered = [];
+  state.startTime = Date.now();
+
+  showScreen('screen-quiz');
+  startTimer();
+  renderQuestion();
+}
+
+// ─── TIMER ────────────────────────────────────────────────────────────────────
+function startTimer() {
+  clearInterval(state.timerInterval);
+  state.timerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+    const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+    const s = String(elapsed % 60).padStart(2, '0');
+    const el = document.getElementById('timer-display');
+    el.textContent = `⏱ ${m}:${s}`;
+    el.className = 'timer-display' + (elapsed > 120 ? ' warning' : '');
+  }, 1000);
+}
+
+function getElapsed() {
+  return Math.floor((Date.now() - state.startTime) / 1000);
+}
+
+// ─── RENDER QUESTION ──────────────────────────────────────────────────────────
+function renderQuestion() {
+  const q = state.questions[state.current];
+  const total = state.questions.length;
+  const progress = ((state.current) / total) * 100;
+
+  document.getElementById('q-counter').textContent = `${state.current + 1} / ${total}`;
+  document.getElementById('progress-fill').style.width = progress + '%';
+  document.getElementById('live-score').textContent = `Score: ${state.score}`;
+  document.getElementById('q-number-label').textContent = `Question ${state.current + 1} of ${total}`;
+  document.getElementById('question-text').textContent = q.q;
+  document.getElementById('feedback-area').innerHTML = '';
+  document.getElementById('next-btn').style.display = 'none';
+
+  // Category badge
+  const badgeWrap = document.getElementById('category-badge-wrap');
+  badgeWrap.innerHTML = `<div class="category-badge" style="margin-bottom:1rem;">${q.cat}</div>`;
+
+  const list = document.getElementById('options-list');
+  list.innerHTML = '';
+  const labels = ['A', 'B', 'C', 'D'];
+  q.opts.forEach((opt, i) => {
+    const li = document.createElement('li');
+    li.className = 'option-item';
+    li.innerHTML = `<span class="option-label">${labels[i]}</span><span class="option-text">${opt}</span>`;
+    li.onclick = () => selectAnswer(i, li);
+    list.appendChild(li);
+  });
+}
+
+// ─── SELECT ANSWER ────────────────────────────────────────────────────────────
+function selectAnswer(idx, el) {
+  const q = state.questions[state.current];
+  const items = document.querySelectorAll('.option-item');
+
+  // Disable all
+  items.forEach(item => item.classList.add('disabled'));
+
+  const isCorrect = idx === q.ans;
+  if (isCorrect) {
+    el.classList.add('correct');
+    state.score++;
+  } else {
+    el.classList.add('wrong');
+    items[q.ans].classList.add('correct');
+  }
+
+  // Remove hover effect on all
+  items.forEach(item => { item.style.pointerEvents = 'none'; });
+
+  // Feedback
+  const fb = document.createElement('div');
+  fb.className = `feedback-box ${isCorrect ? 'correct-fb' : 'wrong-fb'}`;
+  fb.innerHTML = `<span class="feedback-icon">${isCorrect ? '✓' : '✗'}</span><strong>${isCorrect ? 'Correct!' : 'Incorrect.'}</strong> ${q.exp}`;
+  document.getElementById('feedback-area').appendChild(fb);
+
+  // Record
+  state.answered.push({ q: q.q, opts: q.opts, ans: q.ans, chosen: idx, correct: isCorrect, exp: q.exp });
+
+  // Update score display
+  document.getElementById('live-score').textContent = `Score: ${state.score}`;
+
+  // Show next button
+  document.getElementById('next-btn').style.display = 'inline-block';
+  document.getElementById('next-btn').textContent = state.current + 1 < state.questions.length ? 'Next Question →' : 'See Results →';
+}
+
+// ─── NEXT QUESTION ────────────────────────────────────────────────────────────
+function nextQuestion() {
+  state.current++;
+  if (state.current < state.questions.length) {
+    renderQuestion();
+  } else {
+    showResults();
+  }
+}
+
+// ─── RESULTS ──────────────────────────────────────────────────────────────────
+function showResults() {
+  clearInterval(state.timerInterval);
+  const elapsed = getElapsed();
+  const total = state.questions.length;
+  const correct = state.score;
+  const pct = Math.round((correct / total) * 100);
+
+  // Grade
+  let grade, message;
+  if (pct >= 90) { grade = 'A+'; message = '🎉 Outstanding! You have mastered the material.'; }
+  else if (pct >= 80) { grade = 'A'; message = '⭐ Excellent work! Strong sociological knowledge.'; }
+  else if (pct >= 70) { grade = 'B'; message = '👍 Good job! A few more reviews will perfect your knowledge.'; }
+  else if (pct >= 60) { grade = 'C'; message = '📚 Fair effort. Review the topics and try again.'; }
+  else if (pct >= 50) { grade = 'D'; message = '🔍 Needs improvement. Go through the lecture material again.'; }
+  else { grade = 'F'; message = '📖 Keep studying! Revisit all sections and retry.'; }
+
+  document.getElementById('results-grade').textContent = grade;
+  document.getElementById('results-percent').textContent = `${pct}% — ${correct} out of ${total}`;
+  document.getElementById('results-message').textContent = message;
+  document.getElementById('res-correct').textContent = correct;
+  document.getElementById('res-wrong').textContent = total - correct;
+  document.getElementById('res-total').textContent = total;
+
+  const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+  const s = String(elapsed % 60).padStart(2, '0');
+  document.getElementById('res-time').textContent = `${m}:${s}`;
+
+  // Build review
+  const reviewList = document.getElementById('review-list');
+  reviewList.innerHTML = '';
+  const labels = ['A', 'B', 'C', 'D'];
+  state.answered.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = `review-item ${item.correct ? 'review-correct' : 'review-wrong'}`;
+    div.innerHTML = `
+      <div class="review-q">${i + 1}. ${item.q}</div>
+      <div class="review-answer">
+        ${item.correct
+          ? `<span class="correct-ans">✓ Your answer: ${labels[item.chosen]}. ${item.opts[item.chosen]}</span>`
+          : `<span class="wrong-ans">✗ Your answer: ${labels[item.chosen]}. ${item.opts[item.chosen]}</span><br>
+             <span class="correct-ans">✓ Correct: ${labels[item.ans]}. ${item.opts[item.ans]}</span>`
+        }
+        <br><em style="color:#7a7268;font-size:0.82rem;">${item.exp}</em>
+      </div>`;
+    reviewList.appendChild(div);
+  });
+
+  // Celebrate good scores
+  if (pct >= 70) launchConfetti();
+
+  showScreen('screen-results');
+}
+
+function toggleReview(btn) {
+  const list = document.getElementById('review-list');
+  const visible = list.style.display !== 'none';
+  list.style.display = visible ? 'none' : 'flex';
+  btn.textContent = visible ? '📋 View Answer Review' : '📋 Hide Answer Review';
+}
+
+// ─── CONFETTI ─────────────────────────────────────────────────────────────────
+function launchConfetti() {
+  const cel = document.getElementById('celebration');
+  cel.innerHTML = '';
+  const colors = ['#d4850a', '#b84c20', '#3d5a47', '#f0a830', '#0f0e0d'];
+  for (let i = 0; i < 60; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    p.style.width = (6 + Math.random() * 8) + 'px';
+    p.style.height = (6 + Math.random() * 8) + 'px';
+    p.style.animationDuration = (2 + Math.random() * 3) + 's';
+    p.style.animationDelay = Math.random() * 2 + 's';
+    cel.appendChild(p);
+  }
+  setTimeout(() => cel.innerHTML = '', 6000);
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showWelcome() {
+  clearInterval(state.timerInterval);
+  showScreen('screen-welcome');
+}
+
+function restartQuiz() {
+  startQuiz();
+}
+
+// ─── START ────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
